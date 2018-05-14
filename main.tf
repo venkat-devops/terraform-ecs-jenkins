@@ -39,48 +39,48 @@ resource "aws_route_table" "external" {
   }
 }
 
-resource "aws_route_table_association" "subnet2a" {
-  subnet_id      = "${aws_subnet.subnet2a.id}"
+resource "aws_route_table_association" "subnet_a" {
+  subnet_id      = "${aws_subnet.subnet_a.id}"
   route_table_id = "${aws_route_table.external.id}"
 }
 
-resource "aws_route_table_association" "subnet2b" {
-  subnet_id      = "${aws_subnet.subnet2b.id}"
+resource "aws_route_table_association" "subnet_b" {
+  subnet_id      = "${aws_subnet.subnet_b.id}"
   route_table_id = "${aws_route_table.external.id}"
 }
 
-resource "aws_route_table_association" "subnet2c" {
-  subnet_id      = "${aws_subnet.subnet2c.id}"
+resource "aws_route_table_association" "subnet_c" {
+  subnet_id      = "${aws_subnet.subnet_c.id}"
   route_table_id = "${aws_route_table.external.id}"
 }
 
-resource "aws_subnet" "subnet2a" {
+resource "aws_subnet" "subnet_a" {
   vpc_id            = "${aws_vpc.jenkins.id}"
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "{var.availability_zones[0]}"
+  availability_zone = "${var.availability_zones[0]}"
 
   tags {
-    Name = "${var.ecs_cluster_name}-subnet2a"
+    Name = "${var.ecs_cluster_name}-subnet_a"
   }
 }
 
-resource "aws_subnet" "subnet2b" {
+resource "aws_subnet" "subnet_b" {
   vpc_id            = "${aws_vpc.jenkins.id}"
   cidr_block        = "10.0.2.0/24"
-  availability_zone = "{var.availability_zones[1]}"
+  availability_zone = "${var.availability_zones[1]}"
 
   tags {
-    for = "${var.ecs_cluster_name}-subnet2b"
+    for = "${var.ecs_cluster_name}-subnet_b"
   }
 }
 
-resource "aws_subnet" "subnet2c" {
+resource "aws_subnet" "subnet_c" {
   vpc_id            = "${aws_vpc.jenkins.id}"
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "{var.availability_zones[2]}"
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "${var.availability_zones[2]}"
 
   tags {
-    for = "${var.ecs_cluster_name}-subnet2c"
+    for = "${var.ecs_cluster_name}-subnet_c"
   }
 }
 
@@ -165,7 +165,7 @@ resource "aws_autoscaling_group" "asg_jenkins" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
   launch_configuration      = "${aws_launch_configuration.lc_jenkins.name}"
-  vpc_zone_identifier       = ["${aws_subnet.subnet2a.id}", "${aws_subnet.subnet2b.id}", "${aws_subnet.subnet2c.id}"]
+  vpc_zone_identifier       = ["${aws_subnet.subnet_a.id}", "${aws_subnet.subnet_b.id}", "${aws_subnet.subnet_c.id}"]
 
   lifecycle {
     create_before_destroy = true
@@ -230,7 +230,7 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
 resource "aws_alb" "alb_jenkins" {
   name            = "ecs-load-balancer"
   security_groups = ["${aws_security_group.sg_jenkins.id}"]
-  subnets         = ["${aws_subnet.subnet2a.id}", "${aws_subnet.subnet2b.id}", "${aws_subnet.subnet2c.id}"]
+  subnets         = ["${aws_subnet.subnet_a.id}", "${aws_subnet.subnet_b.id}", "${aws_subnet.subnet_c.id}"]
 
   tags {
     Name = "ecs-load-balancer"

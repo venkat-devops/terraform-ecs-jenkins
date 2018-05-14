@@ -71,7 +71,7 @@ variable "max_instance_size" {
 }
 
 variable "desired_instance_capacity" {
-  default     = 1
+  default     = 2
   description = "Desired number of EC2 instances."
 }
 
