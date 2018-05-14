@@ -94,3 +94,65 @@ variable "jenkins_repository_url" {
   default     = "jenkins"
   description = "ECR Repository for Jenkins."
 }
+
+variable "namespace" {
+  type        = "string"
+  description = "Namespace, which could be your organization name, e.g. 'cp' or 'cloudposse'"
+}
+
+variable "jenkins_home" {
+  type        = "string"
+  description = "Jenkins home directory."
+  default     = "/var/jenkins_home"
+}
+
+variable "name" {
+  type        = "string"
+  description = "Solution name, e.g. 'app' or 'jenkins'"
+  default     = "jenkins"
+}
+
+variable "stage" {
+  type        = "string"
+  description = "Stage, e.g. 'prod', 'staging', 'dev', or 'test'"
+}
+
+variable "delimiter" {
+  type        = "string"
+  default     = "-"
+  description = "Delimiter to be used between `name`, `namespace`, `stage`, etc."
+}
+
+variable "attributes" {
+  type        = "list"
+  default     = []
+  description = "Additional attributes (e.g. `policy` or `role`)"
+}
+
+variable "tags" {
+  type        = "map"
+  default     = {}
+  description = "Additional tags (e.g. `map('BusinessUnit`,`XYZ`)"
+}
+
+variable "noncurrent_version_expiration_days" {
+  type        = "string"
+  default     = "35"
+  description = "Backup S3 bucket noncurrent version expiration days"
+}
+
+variable "datapipeline_config" {
+  type        = "map"
+  description = "DataPipeline configuration options"
+
+  default = {
+    instance_type = "t2.micro"
+    email         = ""
+    period        = "24 hours"
+    timeout       = "60 Minutes"
+  }
+}
+
+variable "use_efs_ip_address" {
+  default = "false"
+}

@@ -192,6 +192,8 @@ data "template_file" "user_data" {
     s3_bucket        = "${var.s3_bucket}"
     ecs_cluster_name = "${var.ecs_cluster_name}"
     restore_backup   = "${var.restore_backup}"
+    jenkins_home     = "${var.jenkins_home}"
+    efs_mountpoint   = "${module.efs.host}"
   }
 }
 
@@ -281,3 +283,48 @@ resource "aws_route53_record" "r53_jenkins" {
   ttl     = "300"
   records = ["${aws_alb.alb_jenkins.dns_name}"]
 }
+
+module "efs" {
+  source     = "git::https://github.com/cloudposse/terraform-aws-efs.git?ref=tags/0.3.3"
+  namespace  = "${var.namespace}"
+  name       = "${var.name}"
+  stage      = "${var.stage}"
+  aws_region = "${var.region}"
+  vpc_id     = "${aws_vpc.jenkins.id}"
+
+  # subnets            = "${var.private_subnets}"
+  subnets            = ["${aws_subnet.subnet_a.id}", "${aws_subnet.subnet_b.id}", "${aws_subnet.subnet_c.id}"]
+  availability_zones = "${var.availability_zones}"
+  zone_id            = "${var.dns_zone_id}"
+
+  # EC2 instances (from `elastic_beanstalk_environment`) and DataPipeline instances (from `efs_backup`) are allowed to connect to the EFS
+  security_groups = ["${aws_security_group.sg_jenkins.id}"]
+
+  delimiter  = "${var.delimiter}"
+  attributes = ["${compact(concat(var.attributes, list("efs")))}"]
+  tags       = "${var.tags}"
+}
+
+output "efs_dns_name" {
+  value = "${module.efs.host}"
+}
+
+# EFS backup to S3
+# module "efs_backup" {
+#   source                             = "git::https://github.com/cloudposse/terraform-aws-efs-backup.git?ref=tags/0.4.0"
+#   name                               = "${var.name}"
+#   stage                              = "${var.stage}"
+#   namespace                          = "${var.namespace}"
+#   region                             = "${var.region}"
+#   vpc_id                             = "${aws_vpc.jenkins.id}"
+#   efs_mount_target_id                = "${element(module.efs.mount_target_ids, 0)}"
+#   use_ip_address                     = "${var.use_efs_ip_address}"
+#   noncurrent_version_expiration_days = "${var.noncurrent_version_expiration_days}"
+#   ssh_key_pair                       = "${var.key_name}"
+#   modify_security_group              = "false"
+#   datapipeline_config                = "${var.datapipeline_config}"
+#   delimiter                          = "${var.delimiter}"
+#   attributes                         = ["${compact(concat(var.attributes, list("efs-backup")))}"]
+#   tags                               = "${var.tags}"
+# }
+

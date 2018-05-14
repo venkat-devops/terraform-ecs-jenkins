@@ -3,9 +3,13 @@
 echo ECS_CLUSTER='${ecs_cluster_name}' > /etc/ecs/ecs.config
 
 # Create and set correct permissions for Jenkins mount directory
-jenkins_host_dir=/ecs/jenkins-home
-mkdir -p $jenkins_host_dir
-chmod -R 777 $jenkins_host_dir
+mkdir -p "${jenkins_home}"
+chmod -R 777 "${jenkins_home}"
+
+# EFS Filesystem mouting for Jenkins Home
+yum install -y bind-utils nfs-utils
+mount -t nfs4 -o nfsvers=4.1 "${efs_mountpoint}":/ "${jenkins_home}"
+df -Th
 
 if ${restore_backup}
 then
