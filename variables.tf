@@ -27,7 +27,7 @@ variable "dns_root" {
 
 variable "availability_zones" {
   description = "The availability zone"
-  default     = ["eu-west-2a", "eu-west-2b"]
+  default     = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
 }
 
 variable "ecs_cluster_name" {
